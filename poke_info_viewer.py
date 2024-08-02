@@ -61,6 +61,8 @@ def get_info():
 
     else:
         # show error box
+        errorsg = ("enabletofetch information for {Poke_name.capatlize()from the poke_api}")
+        
         pass
     
 
