@@ -1,124 +1,120 @@
-"""
-Description:
-  Graphical user interface that displays select information about a
-  user-specified Pokemon fetched from the PokeAPI
+""" 
+Description: 
+  Graphical user interface that displays select information about a 
+  user-specified Pokemon fetched from the PokeAPI 
 
 Usage:
   python poke_info_viewer.py
 """
-
-from tkinter import Tk, ttk 
-
-from poke_api import get_pokemon_info
+from tkinter import *
+from tkinter import ttk
+import poke_api
+from tkinter import messagebox
 
 # Create the main window
 root = Tk()
 root.title("Pokemon Information")
+#root.geometry("500x500")
+# TODO: Create the frames
+frame1 = Frame(root)
+frame1.grid(row=0,column=0, columnspan=2, padx=20, pady=20)
 
-# Create the frames
-input = ttk.Frame(root)
-input.grid(row=0, column=0, columnspan=2)
+frame2 = LabelFrame(root, text="info")
+frame2.grid(row=1,column=0,padx=20, pady=20)
 
-info = ttk.LabelFrame(root, text="Info")
-info.grid(row=1, column=0, sticky="N", padx=(10, 5), pady=(5, 10))
+frame3 = LabelFrame(root, text="stat")
+frame3.grid(row=1,column=1,padx=20, pady=20)
 
-stats = ttk.LabelFrame(root, text="Stats")
-stats.grid(row=1, column=1, sticky="N", padx=(5, 10), pady=(5, 10))
+def update_value():
+  value = label2.get()
+  data = poke_api.get_pokemon_info(value)
+  height_val['text'] = f"{data['height']}" + " dm"
+  weight_val['text'] = f"{data['weight']}" + " hg"
+  L = []
 
-# Populate the user input frame with widgets
-input_lbl = ttk.Label(input, text="Pokemon Name:")
-input_lbl.grid(row=0, column=0, padx=(10, 5), pady=10)
+  for i in data['types']:
+    L.append(i['type']['name'])
+    str_val = ",".join(L)
+    type_val['text']= str_val
+    hp_progress['value'] = data['stats'][0]['base_stat']
+    attack_progress['value'] = data['stats'][1]['base_stat']
+    defence_progress['value'] = data['stats'][2]['base_stat']
+    special_attack_progress['value'] = data['stats'][3]['base_stat']
+    special_defence_progress['value'] = data['stats'][4]['base_stat']
+    speed_progress['value'] = data['stats'][5]['base_stat'] 
 
-input_ent = ttk.Entry(input)
-input_ent.grid(row=0, column=1, padx=5, pady=10)
+def errormsg():
+    value = label2.get()
+    small_val = value.lower()
+    cap_val = small_val.capitalize()
+    messagebox.showerror(message=f'Unable to fetch information for {cap_val} from the PokeAPI',icon='error',title='Error')
 
+# TODO: Define button click event handler function
 
-def get_info():
-    poke_name = input_ent.get().strip()
-    if not poke_name:
-        
-        return
-    
-
-    poke_info = get_pokemon_info(poke_name)
-    if poke_info:
-        height_val["text"] = poke_info["height"]
-        weight_val["text"] = poke_info["weight"]
-        
-        type_name = [type_info["type"]["name"] for type_info in poke_info["types"]]
-        type_val["text"] = ", ".join(type_name).capitalize()
-
-
-        # update types_val
-
-
-        hp_bar["value"] = poke_info["stats"][0]["base_stat"]
-        att_bar["value"] = poke_info["stats"][1]["base_stat"]
-        def_bar["value"] = poke_info["stats"][2]["base_stat"]
-        spe_att_bar["value"] = poke_info["stats"][3]["base_stat"]
-        spe_def_bar["value"] = poke_info["stats"][4]["base_stat"]
-        spd_bar["value"] = poke_info["stats"][5]["base_stat"]
-
-    else:
-        # show error box
-        errorsg = ("enabletofetch information for {Poke_name.capatlize()from the poke_api}")
-        
-        pass
-    
-
-    return 
+def button_click():
+  value = label2.get()
+  if poke_api.get_pokemon_info(value) == None :
+    errormsg()
+  else:
+    update_value()
 
 
-input_btn = ttk.Button(input, text="Get Info", command=get_info)
-input_btn.grid(row=0, column=2, padx=(5, 10), pady=10)
+# TODO: Populate the user input frame with widgets
 
-# Populate the info frame
-height_lbl = ttk.Label(info, text="Height:")
-weight_lbl = ttk.Label(info, text="Weight:")
-type_lbl = ttk.Label(info, text="Type:")
+label1 = Label(frame1,text="Pokemon Name")
+label1.grid(row=0,column=0, padx=5, pady=5)
 
-height_val = ttk.Label(info, width=20)
-weight_val = ttk.Label(info, width=20)
-type_val = ttk.Label(info, width=20)
+label2 = Entry(frame1)
+label2.grid(row=0,column=1, padx=5, pady=5)
 
-height_lbl.grid(row=0, column=0, sticky="E", padx=(10, 5), pady=(10, 5))
-weight_lbl.grid(row=1, column=0, sticky="E", padx=(10, 5), pady=5)
-type_lbl.grid(row=2, column=0, sticky="E", padx=(10, 5), pady=(5, 10))
+label3 = Button(frame1,text="Get info",command = button_click)
+label3.grid(row=0,column=2, padx=5, pady=5)
 
-height_val.grid(row=0, column=1, sticky="W", padx=(5, 10), pady=(10, 5))
-weight_val.grid(row=1, column=1, sticky="W", padx=(5, 10), pady=5)
-type_val.grid(row=2, column=1, sticky="W", padx=(5, 10), pady=(5, 10))
 
-# Populate the stats frame
-hp_lbl = ttk.Label(stats, text="HP:")
-att_lbl = ttk.Label(stats, text="Attack:")
-def_lbl = ttk.Label(stats, text="Defense:")
-spe_att_lbl = ttk.Label(stats, text="Special Attack:")
-spe_def_lbl = ttk.Label(stats, text="Special Defence:")
-spd_lbl = ttk.Label(stats, text="Speed:")
 
-hp_lbl.grid(row=0, column=0, sticky="E", padx=(10, 5), pady=(10, 5))
-att_lbl.grid(row=1, column=0, sticky="E", padx=(10, 5), pady=5)
-def_lbl.grid(row=2, column=0, sticky="E", padx=(10, 5), pady=(5, 10))
-spe_att_lbl.grid(row=3, column=0, sticky="E", padx=(10, 5), pady=(5, 10))
-spe_def_lbl.grid(row=4, column=0, sticky="E", padx=(10, 5), pady=(5, 10))
-spd_lbl.grid(row=5, column=0, sticky="E", padx=(10, 5), pady=(5, 10))
+#widget for "info_frame"
 
-MAX_STAT = 255
-BAR_LENGTH = 200
-hp_bar = ttk.Progressbar(stats, maximum=MAX_STAT, length=BAR_LENGTH)
-att_bar = ttk.Progressbar(stats, maximum=MAX_STAT, length=BAR_LENGTH)
-def_bar = ttk.Progressbar(stats, maximum=MAX_STAT, length=BAR_LENGTH)
-spe_att_bar = ttk.Progressbar(stats, maximum=MAX_STAT, length=BAR_LENGTH)
-spe_def_bar = ttk.Progressbar(stats, maximum=MAX_STAT, length=BAR_LENGTH)
-spd_bar = ttk.Progressbar(stats, maximum=MAX_STAT, length=BAR_LENGTH)
+height_label = Label(frame2,text="Height")
+height_label.grid(row=0,column=0, padx=5, pady=5, sticky="E")
+weight_label = Label(frame2,text="Weight")
+weight_label.grid(row=1,column=0, padx=5, pady=5, sticky="E")
+type_label = Label(frame2,text="Type")
+type_label.grid(row=2,column=0, padx=5, pady=5, sticky="E")
 
-hp_bar.grid(row=0, column=1, padx=(5, 10), pady=(10, 5))
-att_bar.grid(row=1, column=1, padx=(5, 10), pady=5)
-def_bar.grid(row=2, column=1, padx=(5, 10), pady=(5, 10))
-spe_att_bar.grid(row=3, column=1, padx=(5, 10), pady=(5, 10))
-spe_def_bar.grid(row=4, column=1, padx=(5, 10), pady=(5, 10))
-spd_bar.grid(row=5, column=1, padx=(5, 10), pady=(5, 10))
+height_val = Label(frame2)
+height_val.grid(row=0,column=2, padx=5, pady=5, sticky="E")
+weight_val = Label(frame2)
+weight_val.grid(row=1,column=2, padx=5, pady=5, sticky="E")
+type_val = Label(frame2)
+type_val.grid(row=2,column=2, padx=5, pady=5, sticky="E")
 
-# Create window
+#widget for "stat_frame"
+hp_val = Label(frame3,text="HP:")
+hp_val.grid(row=0,column=2, padx=5, pady=5, sticky="E")
+attack_val = Label(frame3,text="Attack:")
+attack_val.grid(row=1,column=2, padx=5, pady=5, sticky="E")
+defense_val = Label(frame3,text="Defence:")
+defense_val.grid(row=2,column=2, padx=5, pady=5, sticky="E")
+
+spl_attack_val = Label(frame3,text="Special Attack:")
+spl_attack_val.grid(row=3,column=2, padx=5, pady=5, sticky="E")
+spl_defence_val = Label(frame3,text="Special Defence:")
+spl_defence_val.grid(row=4,column=2, padx=5, pady=5, sticky="E")
+speed_val = Label(frame3,text="Speed:")
+speed_val.grid(row=5,column=2, padx=5, pady=5, sticky="E")
+
+
+hp_progress = ttk.Progressbar(frame3, length=200, max=250)
+hp_progress.grid(row=0,column=3, padx=5, pady=5)
+attack_progress = ttk.Progressbar(frame3, length=200, max=250)
+attack_progress.grid(row=1,column=3, padx=5, pady=5)
+defence_progress = ttk.Progressbar(frame3, length=200, max=250)
+defence_progress.grid(row=2,column=3, padx=5, pady=5)
+special_attack_progress = ttk.Progressbar(frame3, length=200, max=250)
+special_attack_progress.grid(row=3,column=3, padx=5, pady=5)
+special_defence_progress = ttk.Progressbar(frame3, length=200, max=250)
+special_defence_progress.grid(row=4,column=3, padx=5, pady=5)
+speed_progress = ttk.Progressbar(frame3, length=200, max=250)
+speed_progress.grid(row=5,column=3, padx=5, pady=5)
+
 root.mainloop()
