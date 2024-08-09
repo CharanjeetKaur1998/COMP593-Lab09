@@ -22,7 +22,7 @@ frame1.grid(row=0,column=0, columnspan=2, padx=20, pady=20)
 frame2 = LabelFrame(root, text="info")
 frame2.grid(row=1,column=0,padx=20, pady=20)
 
-frame3 = LabelFrame(root, text="stat")
+frame3 = LabelFrame(root, text="stats")
 frame3.grid(row=1,column=1,padx=20, pady=20)
 
 def update_value():
